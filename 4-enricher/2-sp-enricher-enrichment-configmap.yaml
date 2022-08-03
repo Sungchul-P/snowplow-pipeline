@@ -1,0 +1,369 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sp-enricher-enrichment-configmap
+  namespace: kafka
+data:
+  anon_ip.json: |+
+    {
+      "schema": "iglu:com.snowplowanalytics.snowplow/anon_ip/jsonschema/1-0-1",
+      "data": {
+        "name": "anon_ip",
+        "vendor": "com.snowplowanalytics.snowplow",
+        "enabled": true,
+        "parameters": {
+          "anonOctets": 1,
+          "anonSegments": 1
+        }
+      }
+    }
+
+  api_request_enrichment_config.json: |+
+    {
+      "schema": "iglu:com.snowplowanalytics.snowplow.enrichments/api_request_enrichment_config/jsonschema/1-0-0",
+
+      "data": {
+
+        "vendor": "com.snowplowanalytics.snowplow.enrichments",
+        "name": "api_request_enrichment_config",
+        "enabled": false,
+        "parameters": {
+          "inputs": [
+            {
+              "key": "user",
+              "pojo": {
+                "field": "user_id"
+              }
+            },
+            {
+              "key": "user",
+              "json": {
+                "field": "contexts",
+                "schemaCriterion": "iglu:com.snowplowanalytics.snowplow/client_session/jsonschema/1-*-*",
+                "jsonPath": "$.userId"
+              }
+            },
+            {
+              "key": "client",
+              "pojo": {
+                "field": "app_id"
+              }
+            }
+          ],
+          "api": {
+            "http": {
+              "method": "GET",
+              "uri": "http://api.acme.com/users/{{client}}/{{user}}?format=json",
+              "timeout": 2000,
+              "authentication": {
+                "httpBasic": {
+                  "username": "xxx",
+                  "password": "yyy"
+                }
+              }
+            }
+          },
+          "outputs": [
+            {
+              "schema": "iglu:com.acme/user/jsonschema/1-0-0" ,
+              "json": {
+                "jsonPath": "$.record"
+              }
+            }
+          ],
+          "cache": {
+            "size": 3000,
+            "ttl": 60
+          }
+        }
+      }
+    }
+
+  campaign_attribution.json: |+
+    {
+      "schema": "iglu:com.snowplowanalytics.snowplow/campaign_attribution/jsonschema/1-0-1",
+
+      "data": {
+
+        "name": "campaign_attribution",
+        "vendor": "com.snowplowanalytics.snowplow",
+        "enabled": true,
+        "parameters": {
+          "mapping": "static",
+          "fields": {
+            "mktMedium": ["utm_medium"],
+            "mktSource": ["utm_source"],
+            "mktTerm": ["utm_term"],
+            "mktContent": ["utm_content"],
+            "mktCampaign": ["utm_campaign"]
+          }
+        }
+      }
+    }
+
+  cookie_extractor_config.json: |+
+    {
+        "schema": "iglu:com.snowplowanalytics.snowplow/cookie_extractor_config/jsonschema/1-0-0",
+        "data": {
+            "name": "cookie_extractor_config",
+            "vendor": "com.snowplowanalytics.snowplow",
+            "enabled": true,
+            "parameters": {
+                "cookies": ["sp"]
+            }
+        }
+    }
+
+  currency_conversion_config.json: |+
+    {
+      "schema": "iglu:com.snowplowanalytics.snowplow/currency_conversion_config/jsonschema/1-0-0",
+
+      "data": {
+
+        "enabled": false,
+        "vendor": "com.snowplowanalytics.snowplow",
+        "name": "currency_conversion_config",
+        "parameters": {
+          "accountType": "DEVELOPER",
+          "apiKey": "{{KEY}}",
+          "baseCurrency": "USD",
+          "rateAt": "EOD_PRIOR"
+        }
+      }
+    }
+
+  event_fingerprint_enrichment.json: |+
+    {
+      "schema": "iglu:com.snowplowanalytics.snowplow/event_fingerprint_config/jsonschema/1-0-1",
+
+      "data": {
+
+        "vendor": "com.snowplowanalytics.snowplow",
+        "name": "event_fingerprint_config",
+        "enabled": true,
+        "parameters": {
+          "excludeParameters": ["eid", "nuid", "stm", "cv"],
+          "hashAlgorithm": "MD5"
+        }
+      }
+    }
+
+  http_header_extractor_config.json: |+
+    {
+      "schema": "iglu:com.snowplowanalytics.snowplow.enrichments/http_header_extractor_config/jsonschema/1-0-0",
+
+      "data": {
+
+        "vendor": "com.snowplowanalytics.snowplow.enrichments",
+        "name": "http_header_extractor_config",
+        "enabled": false,
+        "parameters": {
+          "headersPattern": ".*"
+        }
+      }
+    }
+
+  iab_spiders_and_robots_enrichment.json: |+
+    {
+        "schema": "iglu:com.snowplowanalytics.snowplow.enrichments/iab_spiders_and_robots_enrichment/jsonschema/1-0-0",
+
+        "data": {
+
+            "name": "iab_spiders_and_robots_enrichment",
+            "vendor": "com.snowplowanalytics.snowplow.enrichments",
+            "enabled": false,
+            "parameters": {
+                "ipFile": {
+                    "database": "ip_exclude_current_cidr.txt",
+                    "uri": "s3://my-private-bucket/iab"
+                },
+                "excludeUseragentFile": {
+                    "database": "exclude_current.txt",
+                    "uri": "s3://my-private-bucket/iab"
+                },
+                "includeUseragentFile": {
+                    "database": "include_current.txt",
+                    "uri": "s3://my-private-bucket/iab"
+                }
+            }
+        }
+    }
+
+  ip_lookups.json: |+
+    {
+      "schema": "iglu:com.snowplowanalytics.snowplow/ip_lookups/jsonschema/2-0-0",
+
+      "data": {
+
+        "name": "ip_lookups",
+        "vendor": "com.snowplowanalytics.snowplow",
+        "enabled": true,
+        "parameters": {
+          "geo": {
+            "database": "GeoLite2-City.mmdb",
+            "uri": "http://snowplow-hosted-assets.s3.amazonaws.com/third-party/maxmind"
+          }
+        }
+      }
+    }
+
+  javascript_script_enrichment.json: |+
+    {
+      "schema": "iglu:com.snowplowanalytics.snowplow/javascript_script_config/jsonschema/1-0-0",
+
+      "data": {
+
+        "vendor": "com.snowplowanalytics.snowplow",
+        "name": "javascript_script_config",
+        "enabled": false,
+        "parameters": {
+          "script": "ZnVuY3Rpb24gcHJvY2VzcyhldmVudCkgew0KDQogIHZhciBwbGF0Zm9ybSA9IGV2ZW50LmdldFBsYXRmb3JtKCksDQogICAgICBhcHBJZCAgICA9IGV2ZW50LmdldEFwcF9pZCgpOw0KDQogIGlmIChwbGF0Zm9ybSA9PSAic2VydmVyIiAmJiBhcHBJZCAhPSAic2VjcmV0Iikgew0KICAgIHRocm93ICJTZXJ2ZXItc2lkZSBldmVudCBoYXMgaW52YWxpZCBhcHBfaWQ6ICIgKyBhcHBJZDsNCiAgfQ0KICANCiAgaWYgKGFwcElkID09IG51bGwpIHsNCiAgICByZXR1cm4gW107DQogIH0NCg0KICAvLyBVc2UgbmV3IFN0cmluZygpIGJlY2F1c2UgaHR0cDovL25lbHNvbndlbGxzLm5ldC8yMDEyLzAyL2pzb24tc3RyaW5naWZ5LXdpdGgtbWFwcGVkLXZhcmlhYmxlcy8NCiAgdmFyIGFwcElkVXBwZXIgPSBuZXcgU3RyaW5nKGFwcElkLnRvVXBwZXJDYXNlKCkpOw0KDQogIHJldHVybiBbIHsgc2NoZW1hOiAiaWdsdTpjb20uYWNtZS9mb28vanNvbnNjaGVtYS8xLTAtMCIsDQogICAgICAgICAgICAgICBkYXRhOiB7IGFwcElkVXBwZXI6IGFwcElkVXBwZXIgfQ0KICAgICAgICAgICB9IF07DQp9"
+        }
+      }
+    }
+
+  pii_enrichment_config.json: |+
+    {
+      "schema": "iglu:com.snowplowanalytics.snowplow.enrichments/pii_enrichment_config/jsonschema/2-0-0",
+      "data": {
+        "vendor": "com.snowplowanalytics.snowplow.enrichments",
+        "name": "pii_enrichment_config",
+        "emitEvent": true,
+        "enabled": true,
+        "parameters": {
+          "pii": [
+            {
+              "pojo": {
+                "field": "user_id"
+              }
+            },
+            {
+              "pojo": {
+                "field": "user_ipaddress"
+              }
+            },
+            {
+              "json": {
+                "field": "unstruct_event",
+                "schemaCriterion": "iglu:com.mailchimp/subscribe/jsonschema/1-*-*",
+                "jsonPath": "$.data.['email', 'ip_opt']"
+              }
+            }
+          ],
+          "strategy": {
+            "pseudonymize": {
+              "hashFunction": "SHA-1",
+              "salt": "pepper123"
+            }
+          }
+        }
+      }
+    }
+
+  referer_parser.json: |+
+    {
+      "schema": "iglu:com.snowplowanalytics.snowplow/referer_parser/jsonschema/2-0-0",
+
+      "data": {
+
+        "name": "referer_parser",
+        "vendor": "com.snowplowanalytics.snowplow",
+        "enabled": true,
+        "parameters": {
+          "internalDomains": [],
+          "database": "referers-latest.json",
+                "uri": "https://s3-eu-west-1.amazonaws.com/snowplow-hosted-assets/third-party/referer-parser/"
+        }
+      }
+    }
+
+
+  sql_query_enrichment_config.json: |+
+    {
+      "schema": "iglu:com.snowplowanalytics.snowplow.enrichments/sql_query_enrichment_config/jsonschema/1-0-0",
+
+      "data": {
+
+        "vendor": "com.snowplowanalytics.snowplow.enrichments",
+        "name": "sql_query_enrichment_config",
+        "enabled": false,
+        "parameters": {
+          "inputs": [
+            {
+              "placeholder": 1,
+              "pojo": {
+                "field": "user_id"
+              }
+            },
+            {
+              "placeholder": 1,
+              "json": {
+                "field": "contexts",
+                "schemaCriterion": "iglu:com.snowplowanalytics.snowplow/client_session/jsonschema/1-*-*",
+                "jsonPath": "$.userId"
+              }
+            },
+            {
+              "placeholder": 2,
+              "pojo": {
+                "field": "app_id"
+              }
+            }
+          ],
+          "database": {
+            "postgresql": {
+              "host": "cluster01.redshift.acme.com",
+              "port": 5439,
+              "sslMode": true,
+              "username": "snowplow_enrich_ro",
+              "password": "1asIkJed",
+              "database": "crm"
+            }
+          },
+          "query": {
+            "sql": "SELECT username, email_address, date_of_birth FROM tbl_users WHERE user = ? AND client = ? LIMIT 1"
+          },
+          "output": {
+            "expectedRows": "AT_MOST_ONE",
+            "json": {
+              "schema": "iglu:com.acme/user/jsonschema/1-0-0",
+              "describes": "ALL_ROWS",
+              "propertyNames": "CAMEL_CASE"
+            }
+          },
+          "cache": {
+            "size": 3000,
+            "ttl": 60
+          }
+        }
+        }
+    }
+
+  weather_enrichment_config.json: |+
+    {
+        "schema": "iglu:com.snowplowanalytics.snowplow.enrichments/weather_enrichment_config/jsonschema/1-0-0",
+
+        "data": {
+            "enabled": false,
+            "vendor": "com.snowplowanalytics.snowplow.enrichments",
+            "name": "weather_enrichment_config",
+            "parameters": {
+                "apiKey": "{{KEY}}",
+                "cacheSize": 5100,
+                "geoPrecision": 1,
+                "apiHost": "history.openweathermap.org",
+                "timeout": 5
+            }
+        }
+    }
+
+  yauaa_enrichment_config.json: |+
+    {
+        "schema": "iglu:com.snowplowanalytics.snowplow.enrichments/yauaa_enrichment_config/jsonschema/1-0-0",
+
+        "data": {
+            "enabled": true,
+            "vendor": "com.snowplowanalytics.snowplow.enrichments",
+            "name": "yauaa_enrichment_config"
+        }
+    }

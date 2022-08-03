@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: sp-enricher-kafka
+  name: sp-enricher-kafka
+  namespace: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sp-enricher-kafka
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: sp-enricher-kafka
+    spec:
+      containers:
+      - image: snowplow/stream-enrich-kafka:3.2.2
+        name: scala-stream-enricher-kafka
+        args:
+          - "--config"
+          - "/snowplow/config/enrich.hocon"
+          - "--resolver"
+          - "file:/snowplow/config/iglu_resolver.json"
+          - "--enrichments"
+          - "file:/snowplow/config/enrichments/"
+          - "--force-cached-files-download"
+        resources: {}
+        volumeMounts:
+          - mountPath: /snowplow/config/enrich.hocon
+            subPath: enrich.hocon
+            name: sp-enricher-kafka
+          - mountPath: /snowplow/config/iglu_resolver.json
+            subPath: iglu_resolver.json
+            name: sp-enricher-kafka
+          - mountPath: /snowplow/config/enrichments/
+            name: sp-enricher-enrichment
+      volumes:
+        - name: sp-enricher-kafka
+          configMap:
+            name: sp-enricher-kafka-config
+            items:
+              - key: enrich.hocon
+                path: enrich.hocon
+              - key: iglu_resolver.json
+                path: iglu_resolver.json
+        - name: sp-enricher-enrichment
+          configMap:
+            name: sp-enricher-enrichment-configmap
+status: {}
