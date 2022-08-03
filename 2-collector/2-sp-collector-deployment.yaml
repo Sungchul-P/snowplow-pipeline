@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: sp-collector-kafka
+  name: sp-collector-kafka
+  namespace: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sp-collector-kafka
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: sp-collector-kafka
+    spec:
+      containers:
+      - image: snowplow/scala-stream-collector-kafka:2.6.3-distroless
+        name: scala-stream-collector-kafka
+        args:
+          - "--config"
+          - "/snowplow/config.hocon"
+        resources: {}
+        volumeMounts:
+          - mountPath: /snowplow/config.hocon
+            subPath: config.hocon
+            name: config-hocon
+      volumes:
+        - name: config-hocon
+          configMap:
+            name: sp-collector-kafka-config
+            items:
+              - key: config.hocon
+                path: config.hocon
+status: {}
