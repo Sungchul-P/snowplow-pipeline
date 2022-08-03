@@ -1,0 +1,22 @@
+# To use the KafkaConnector resource, you have to first enable the connector operator using
+# the strimzi.io/use-connector-resources annotation on the KafkaConnect custom resource.
+# From Apache Kafka 3.1.1 and 3.2.0, you also have to add the FileStreamSourceConnector
+# connector to the container image. You can do that using the kafka-connect-build.yaml example.
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: file-sink-connector
+  labels:
+    # The strimzi.io/cluster label identifies the KafkaConnect instance
+    # in which to create this connector. That KafkaConnect instance
+    # must have the strimzi.io/use-connector-resources annotation
+    # set to true.
+    strimzi.io/cluster: snowplow-cluster
+spec:
+  class: org.apache.kafka.connect.file.FileStreamSinkConnector
+  tasksMax: 1
+  config:
+    file: "/tmp/test.txt"
+    topics: snowplow-enriched-good
+    key.converter: "org.apache.kafka.connect.storage.StringConverter"
+    value.converter: "org.apache.kafka.connect.storage.StringConverter"
