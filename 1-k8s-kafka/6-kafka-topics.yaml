@@ -1,0 +1,54 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: snowplow-good
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: snowplow
+spec:
+  partitions: 1
+  replicas: 3
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: snowplow-bad
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: snowplow
+spec:
+  partitions: 1
+  replicas: 3
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: snowplow-enriched-good
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: snowplow
+spec:
+  partitions: 1
+  replicas: 3
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: snowplow-enriched-bad
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: snowplow
+spec:
+  partitions: 1
+  replicas: 3
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: snowplow-pii
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: snowplow
+spec:
+  partitions: 1
+  replicas: 3

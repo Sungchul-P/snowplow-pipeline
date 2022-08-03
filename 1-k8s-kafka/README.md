@@ -42,3 +42,9 @@ kubectl -n kafka run kafka-consumer -ti --image=quay.io/strimzi/kafka:0.30.0-kaf
 # Kafka UI (Kafdrop)
 kubectl apply -f 5-kafdrop.yaml
 ```
+
+### 파이프라인에서 사용할 카프카 토픽 생성
+
+```bash
+kubectl apply -f 6-kafka-topics.yaml
+```
